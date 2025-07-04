@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <title>DOTFARM Terminal Node</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        html {
+            max-width: 70ch;
+            padding: calc(1vmin + .5rem);
+            margin-inline: auto;
+            font-size: clamp(1em, 0.909em + 0.45vmin, 1.25em);
+            font-family: monospace;
+            background-color: #000;
+            color: #00ff00;
+        }
+        .blink {
+            animation: blink 1s steps(2, start) infinite;
+        }
+        @keyframes blink {
+            to { visibility: hidden; }
+        }
+    </style>
+</head>
+<body>
+    <br><br><br>
+    <pre>
+███████╗  ██████╗ ████████╗███████╗ █████╗ ██████╗ ███╗   ███╗
+██╔══██╗██╔═══██╗╚══██╔══╝██╔════╝██╔══██╗██╔══██╗████╗ ████║
+██║  ██║██║   ██║   ██║   █████╗  ███████║██████╔╝██╔████╔██║
+██║  ██║██║   ██║   ██║   ██╔══╝  ██╔══██║██╔══██╗██║╚██╔╝██║
+██████╔╝╚██████╔╝   ██║   ██║     ██║  ██║██║  ██║██║ ╚═╝ ██║
+╚═════╝  ╚═════╝    ╚═╝   ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝
+    </pre>
+
+    <p id="typewriter"></p>
+    <p><span class="blink">█</span></p>
+
+    <p id="date"></p>
+    <p id="fact"></p>
+
+    <script>
+        const text = [
+            "This website is running inside its own Docker container,",
+            "behind a Traefik reverse proxy with Docker provider,",
+            "with automatic TLS certificate from Let's Encrypt,",
+            "deployed via GitLab CI/CD,",
+            "to a server managed with Ansible."
+        ];
+        let line = 0;
+        let i = 0;
+        function type() {
+            if (line < text.length) {
+                const currentLine = text[line];
+                if (i < currentLine.length) {
+                    document.getElementById("typewriter").innerHTML += currentLine.charAt(i);
+                    i++;
+                    setTimeout(type, 50);
+                } else {
+                    document.getElementById("typewriter").innerHTML += "<br>";
+                    line++;
+                    i = 0;
+                    setTimeout(type, 500);
+                }
+            }
+        }
+        type();
+
+        const now = new Date();
+        const dateOptions = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
+        document.getElementById("date").innerHTML = `🗓️ Heute ist ${now.toLocaleDateString("de-DE", dateOptions)}.`;
+
+        // Wikipedia API: "Was geschah am heutigen Tag"
+        const month = now.getMonth() + 1;
+        const day = now.getDate();
+        fetch(`https://de.wikipedia.org/api/rest_v1/feed/onthisday/events/${month}/${day}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.events && data.events.length > 0) {
+                    const event = data.events[Math.floor(Math.random() * data.events.length)];
+                    document.getElementById("fact").innerHTML = `🔹 Am ${day}.${month} im Jahr ${event.year}: ${event.text}`;
+                } else {
+                    document.getElementById("fact").innerHTML = "Heute ist anscheinend nichts passiert...";
+                }
+            })
+            .catch(() => {
+                document.getElementById("fact").innerHTML = "Wikipedia konnte heute nicht geladen werden.";
+            });
+    </script>
+</body>
+</html>
