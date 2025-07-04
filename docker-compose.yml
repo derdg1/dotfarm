@@ -1,6 +1,6 @@
 version: '3.9'
 services:
     derdg1:
-        image: 'ghcr.io/derdg1/dotfarm-site:latest'
+        image: 'ghcr.io/derdg1/dotfarm:latest'
         ports:
             - '8080:80'
